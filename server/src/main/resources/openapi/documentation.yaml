@@ -1,0 +1,79 @@
+openapi: "3.0.3"
+info:
+  title: "MindFlow API Documentation"
+  description: "Documentação das APIs do Trabalho Denis (MindFlow)"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8086"
+    description: "Servidor Local"
+paths:
+  /auth/google:
+    post:
+      summary: "Autentica usuário via Google ID Token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken:
+                  type: string
+                  description: "Token recebido do Credential Manager no Android"
+      responses:
+        "200":
+          description: "Autenticação bem sucedida"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+  /tasks:
+    get:
+      summary: "Retorna a lista de tarefas"
+      responses:
+        "200":
+          description: "Operação bem sucedida"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    subject:
+                      type: string
+                    priority:
+                      type: string
+                    isCompleted:
+                      type: boolean
+    post:
+      summary: "Cria uma nova tarefa"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                subject:
+                  type: string
+                priority:
+                  type: string
+      responses:
+        "201":
+          description: "Tarefa criada"
+components:
+  schemas: {}
