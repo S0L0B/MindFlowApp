@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.example.trabalhodenis.R
+import com.example.trabalhodenis.data.local.repository.UserRepository
 import com.example.trabalhodenis.ui.theme.InputBackground
 import com.example.trabalhodenis.ui.theme.PrimaryBlack
 import com.example.trabalhodenis.ui.theme.SecondaryGray
@@ -36,7 +37,10 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(
+    userRepository: UserRepository,
+    onLoginSuccess: () -> Unit
+) {
     var isLoginMode by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -46,16 +50,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     val scope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
 
-
     val webClientId = "1072037048343-ir0piiv8kl014bm6sc2ncuor1mcot544.apps.googleusercontent.com"
 
-    // Tentativa de Auto-Login ao abrir a tela
     LaunchedEffect(Unit) {
         try {
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(false)
                 .setServerClientId(webClientId)
-                .setAutoSelectEnabled(true) // Crucial para entrar sem clicar
+                .setAutoSelectEnabled(true)
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -63,13 +65,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 .build()
 
             val result = credentialManager.getCredential(context, request)
-            val credential = result.credential
-
-            if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            if (result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                 onLoginSuccess()
             }
         } catch (e: Exception) {
-            // Falha silenciosa no auto-login (usuário precisa clicar no botão)
             Log.d("OAuth", "Auto-login não disponível: ${e.message}")
         }
     }
@@ -79,15 +78,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier.size(150.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_mindflow),
-                contentDescription = "Logo MindFlow",
-                modifier = Modifier.fillMaxWidth()
-            )
+        Box(modifier = Modifier.size(150.dp), contentAlignment = Alignment.Center) {
+            Image(painter = painterResource(id = R.drawable.logo_mindflow), contentDescription = "Logo MindFlow", modifier = Modifier.fillMaxWidth())
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -104,19 +96,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(InputBackground)
-                        .padding(4.dp)
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(InputBackground).padding(4.dp)
                 ) {
                     Button(
                         onClick = { isLoginMode = true },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isLoginMode) PrimaryBlack else Color.Transparent,
-                            contentColor = if (isLoginMode) Color.White else SecondaryGray
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = if (isLoginMode) PrimaryBlack else Color.Transparent, contentColor = if (isLoginMode) Color.White else SecondaryGray),
                         shape = RoundedCornerShape(8.dp),
                         elevation = null
                     ) { Text(text = "Entrar") }
@@ -124,10 +109,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     Button(
                         onClick = { isLoginMode = false },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (!isLoginMode) PrimaryBlack else Color.Transparent,
-                            contentColor = if (!isLoginMode) Color.White else SecondaryGray
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = if (!isLoginMode) PrimaryBlack else Color.Transparent, contentColor = if (!isLoginMode) Color.White else SecondaryGray),
                         shape = RoundedCornerShape(8.dp),
                         elevation = null
                     ) { Text(text = "Criar Conta") }
@@ -140,7 +122,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     TextField(
                         value = name,
                         onValueChange = { name = it },
-                        placeholder = { Text(text = "Seu nome", color = SecondaryGray) },
+                        placeholder = { Text(text = "Seu nome") },
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                         leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null) },
                         colors = TextFieldDefaults.colors(focusedContainerColor = InputBackground, unfocusedContainerColor = InputBackground, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
@@ -153,7 +135,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 TextField(
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = { Text(text = "seu@email.com", color = SecondaryGray) },
+                    placeholder = { Text(text = "seu@email.com") },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null) },
                     colors = TextFieldDefaults.colors(focusedContainerColor = InputBackground, unfocusedContainerColor = InputBackground, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
@@ -165,7 +147,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 TextField(
                     value = password,
                     onValueChange = { password = it },
-                    placeholder = { Text(text = ".........", color = SecondaryGray) },
+                    placeholder = { Text(text = ".........") },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
                     trailingIcon = { Icon(Icons.Outlined.Visibility, contentDescription = null) },
@@ -174,11 +156,35 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     shape = RoundedCornerShape(12.dp)
                 )
 
-
-
                 Spacer(modifier = Modifier.height(24.dp))
+                
                 Button(
-                    onClick = onLoginSuccess,
+                    onClick = {
+                        if (email.isBlank() || password.isBlank()) {
+                            Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        
+                        scope.launch {
+                            if (isLoginMode) {
+                                val success = userRepository.login(email, password)
+                                if (success) onLoginSuccess()
+                                else Toast.makeText(context, "Email ou senha incorretos", Toast.LENGTH_SHORT).show()
+                            } else {
+                                if (name.isBlank()) {
+                                    Toast.makeText(context, "Preencha seu nome", Toast.LENGTH_SHORT).show()
+                                    return@launch
+                                }
+                                val success = userRepository.register(name, email, password)
+                                if (success) {
+                                    Toast.makeText(context, "Conta criada! Faça o login.", Toast.LENGTH_SHORT).show()
+                                    isLoginMode = true
+                                } else {
+                                    Toast.makeText(context, "Email já cadastrado", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlack),
                     shape = RoundedCornerShape(12.dp)
@@ -188,39 +194,19 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Botão do Google (OAuth)
                 OutlinedButton(
                     onClick = {
                         scope.launch {
                             try {
-                                val googleIdOption = GetGoogleIdOption.Builder()
-                                    .setFilterByAuthorizedAccounts(false)
-                                    .setServerClientId(webClientId)
-                                    .setAutoSelectEnabled(true) // Ativa o login automático na próxima vez
-                                    .build()
-
-                                val request = GetCredentialRequest.Builder()
-                                    .addCredentialOption(googleIdOption)
-                                    .build()
-
+                                val googleIdOption = GetGoogleIdOption.Builder().setFilterByAuthorizedAccounts(false).setServerClientId(webClientId).setAutoSelectEnabled(true).build()
+                                val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
                                 val result = credentialManager.getCredential(context, request)
-                                val credential = result.credential
-
-                                // Verificação mais robusta do tipo de credencial
-                                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                    Log.d("OAuth", "Login com sucesso: ${googleIdTokenCredential.displayName}")
-                                    onLoginSuccess() // Entra no app imediatamente
+                                if (result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                    onLoginSuccess()
                                 }
                             } catch (e: Exception) {
-                                Log.e("OAuth", "Erro detalhado: ${e.message}", e)
-                                val errorMsg = when {
-                                    e.message?.contains("7") == true -> "Erro 7: Google Play Services desatualizado ou SHA-1 não cadastrado."
-                                    e.message?.contains("10") == true -> "Erro 10: Client ID incorreto ou erro de configuração no console."
-                                    e.message?.contains("16") == true -> "Erro 16: Autenticação cancelada pelo usuário ou falha de rede."
-                                    else -> "Falha: ${e.localizedMessage}"
-                                }
-                                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                                Log.e("OAuth", "Erro Google: ${e.message}")
+                                Toast.makeText(context, "Falha na autenticação Google", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -229,15 +215,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     border = BorderStroke(1.dp, Color(0xFFDDDDDD)),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_google_logo),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Image(painter = painterResource(id = R.drawable.ic_google_logo), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(text = "Continuar com Google", color = Color(0xFF1F1F1F), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                     }

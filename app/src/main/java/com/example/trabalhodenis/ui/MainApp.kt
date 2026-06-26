@@ -46,6 +46,7 @@ fun MainApp() {
     val presentationRepo = remember { PresentationRepository(db.presentationDao()) }
     val notebookRepo = remember { NotebookRepository(db.notebookDao()) }
     val noteRepo = remember { NoteRepository(db.noteDao()) }
+    val userRepo = remember { UserRepository(db.userDao()) }
 
     // Estados de UI
     var currentScreen by remember { mutableStateOf(AppScreen.Login) }
@@ -70,7 +71,10 @@ fun MainApp() {
     }
 
     if (currentScreen == AppScreen.Login) {
-        LoginScreen { currentScreen = AppScreen.Tasks }
+        LoginScreen(
+            userRepository = userRepo,
+            onLoginSuccess = { currentScreen = AppScreen.Tasks }
+        )
     } else if (showSettings) {
         SettingsScreen(
             isDarkMode = isDarkMode,

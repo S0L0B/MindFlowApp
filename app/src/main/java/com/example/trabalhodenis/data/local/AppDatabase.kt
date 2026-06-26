@@ -12,28 +12,19 @@ import com.example.trabalhodenis.data.local.entity.*
         TaskEntity::class,
         CalendarEntity::class,
         PresentationEntity::class,
-        SlideEntity::class
+        SlideEntity::class,
+        UserEntity::class
     ],
-    version = 1,
+    version = 2, // Incrementei a versão para 2 pois adicionei uma nova tabela
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
-    // NOTEBOOKS
     abstract fun notebookDao(): NotebookDao
-
-    // NOTES
     abstract fun noteDao(): NoteDao
-
-    // TASKS
     abstract fun taskDao(): TaskDao
-
-    // CALENDAR EVENTS
     abstract fun calendarDao(): CalendarDao
-
-    // PRESENTATIONS
     abstract fun presentationDao(): PresentationDao
-
-    // SLIDES
     abstract fun slideDao(): SlideDao
+    abstract fun userDao(): UserDao
 }
