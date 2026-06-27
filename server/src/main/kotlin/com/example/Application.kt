@@ -38,17 +38,15 @@ fun Application.module() {
         )
 
         post("/auth/google") {
-            call.respondText(
-                text = """
-                    {
-                      "userId": "google-user-id",
-                      "name": "Usuário Google",
-                      "email": "usuario@gmail.com"
-                    }
-                """.trimIndent(),
-                contentType = ContentType.Application.Json,
-                status = HttpStatusCode.OK
-            )
+            call.respond(mapOf("status" to "Google Auth validado no servidor"))
+        }
+
+        post("/auth/register") {
+            call.respond(HttpStatusCode.Created, mapOf("status" to "Usuário criado no servidor"))
+        }
+
+        post("/auth/login") {
+            call.respond(mapOf("token" to "token-fake-do-servidor"))
         }
 
         route("/tasks") {

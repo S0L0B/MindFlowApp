@@ -19,21 +19,49 @@ paths:
               properties:
                 idToken:
                   type: string
-                  description: "Token recebido do Credential Manager no Android"
       responses:
         "200":
           description: "Autenticação bem sucedida"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  userId:
-                    type: string
-                  name:
-                    type: string
-                  email:
-                    type: string
+  /auth/register:
+    post:
+      summary: "Cadastra um novo usuário"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "201":
+          description: "Usuário criado"
+        "409":
+          description: "Email já cadastrado"
+  /auth/login:
+    post:
+      summary: "Login via email e senha"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: "Login bem sucedido"
+        "401":
+          description: "Credenciais inválidas"
   /tasks:
     get:
       summary: "Retorna a lista de tarefas"
